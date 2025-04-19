@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOTO Inventory</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="top-nav">
+        <a href="index.html" class="logout-button">🚪 Logout</a>
+        <a href="history.html" class="history-button">📜 History</a>
+      </div>
+      
+    <h2>Welcome back to LOTOGuard, <span id="userName"></span></h2>
+  </header>
+
+  <section id="inventoryList" class="grid"></section>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById("userName").innerText = localStorage.getItem("lotoUser") || "Guest";
+    renderInventory();
+  </script>
+</body>
+</html>
