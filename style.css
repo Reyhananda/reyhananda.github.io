@@ -200,9 +200,10 @@ button:hover {
   background-color: #34495e;
   color: white;
   display: flex;
-  justify-content: space-around;
-  padding: 12px 0;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  justify-content: center; /* Center buttons */
+  align-items: center;
+  padding: 10px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   z-index: 999;
   font-size: 1rem;
 }
@@ -211,11 +212,33 @@ button:hover {
   color: white;
   text-decoration: none;
   font-weight: bold;
+  padding: 15px;
+  margin: 0 15px; /* Increased margin for more space between buttons */
+  border-radius: 8px;
+  width: 45%;
+  text-align: center;
+}
+
+.history-btn {
+  background-color: #9b59b6;
+  border-radius: 8px;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  border-radius: 8px;
 }
 
 .nav-bar a:hover {
   text-decoration: underline;
 }
+
+.nav-bar a:active {
+  opacity: 0.8;
+}
+
+
+
 
 ul#historyList li {
   background: #fff;
@@ -236,76 +259,58 @@ ul#historyList {
 }
 
 /* Media Query untuk iPhone 12 Pro Max */
-@media (max-width: 430px) {
-  body {
-    font-size: 13px; /* Ukuran font lebih kecil */
-    padding-bottom: 50px; /* Kurangi padding bawah */
-  }
-
-  h1, h2 {
-    font-size: 1.4rem; /* Sesuaikan ukuran font untuk h1 dan h2 */
-  }
-
-  .centered {
-    height: 80vh; /* Mengurangi tinggi agar lebih proporsional */
-    padding: 0.8rem; /* Menyesuaikan padding */
-  }
-
+@media (max-width: 768px) {
   .top-nav {
-    flex-direction: column; /* Ubah menjadi vertikal */
-    align-items: flex-start;
-    padding: 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
   }
 
-  .home-button, .history-button, .logout-button {
-    padding: 8px 14px; /* Mengurangi padding untuk tombol */
-    font-size: 0.9rem; /* Ukuran font tombol lebih kecil */
+  .home-button,
+  .history-button,
+  .logout-button {
+    font-size: 0.8rem;
+    padding: 6px 10px;
   }
 
   .grid {
-    grid-template-columns: repeat(3, 1fr); /* Menampilkan 3 card per baris */
+    grid-template-columns: repeat(2, 1fr); /* 2 card per baris di mobile kecil */
     gap: 10px;
   }
 
   .item-card {
-    padding: 6px; /* Mengurangi padding */
-    font-size: 0.8rem; /* Ukuran font item lebih kecil */
+    padding: 6px;
   }
 
-  .item-card img {
-    max-width: 70%; /* Menyesuaikan gambar agar tidak terlalu besar */
+  .item-card button {
+    font-size: 0.7rem;
+    padding: 4px;
   }
 
   .modal-box {
-    padding: 12px; /* Mengurangi padding di modal */
-    max-width: 330px; /* Sesuaikan lebar modal */
+    max-width: 100%;
+  }
+
+  input, button, textarea {
+    max-width: 100%;
+    width: 100%;
   }
 
   .nav-bar {
-    font-size: 0.85rem;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .nav-bar a {
-    font-size: 0.8rem; /* Ukuran font link di nav-bar lebih kecil */
     padding: 6px 0;
   }
 
-  ul#historyList {
-    padding: 1rem;
+  .nav-bar a {
+    font-size: 0.75rem;
+    padding: 6px 2px;
+    margin: 0 2px;
   }
 
-  ul#historyList li {
-    font-size: 0.8rem;
-    line-height: 1.2rem;
-  }
-  input, button {
-    width: 100%;
-    padding: 10px;
+  body {
+    font-size: 14px;
   }
 
-  footer {
-    font-size: 0.8rem;
+  h1, h2 {
+    font-size: 1.3rem;
   }
 }

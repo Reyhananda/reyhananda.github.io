@@ -142,9 +142,9 @@ const baseItem = {
     nav.id = "navBar";
     nav.innerHTML = `
       <div class="nav-bar">
-        <a href="inventory.html">📦 Inventory</a>
-        <a href="history.html">📜 History</a>
-        <a href="index.html">🚪 Logout</a>
+  <a href="history.html" class="history-btn">📜 History</a>
+  <a href="index.html" class="logout-btn">🚪 Logout</a>
+
       </div>
     `;
     document.body.appendChild(nav);
