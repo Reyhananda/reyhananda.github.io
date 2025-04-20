@@ -25,7 +25,7 @@ const baseItem = {
       div.innerHTML = `
         <input type="checkbox" class="multi-check" data-index="${index}" ${!isAvailable ? "disabled" : ""}>
         <img src="${item.img}" alt="${item.id}">
-        <h3>${item.id}</h3>
+        <h3 style="color: #2c3e50">${item.id}</h3>
         <p class="status">${isAvailable ? "✅ Available" : "⛔ In Use"}</p>
         ${!isAvailable && item.description ? `<div class="description">📋 ${item.description}</div>` : ""}
         <div class="button-group">
