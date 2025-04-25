@@ -54,6 +54,7 @@ function checkOut(index) {
       inventory[index].description = description;
       logActivity("Use", inventory[index].id, 1, description);
       renderInventory();
+      showNotice(`Now You Can Use ${inventory[index].id}, Don't forget to return it back after use`, "info");
     }
   });
 }
@@ -64,6 +65,7 @@ function checkIn(index) {
   inventory[index].description = "";
   logActivity("Return", inventory[index].id, 1);
   renderInventory();
+  showNotice(`${inventory[index].id} has been returned`, "success");
 }
 
 function useSelectedLOTOS() {
@@ -197,6 +199,46 @@ function showPrompt(message, callback) {
     callback(value);
   });
 }
+
+function showNotice(message, type = "info") {
+  const existing = document.getElementById("customNotice");
+  if (existing) existing.remove();
+
+  const icon = type === "success" ? "✅" : "🔓";
+
+  const box = document.createElement("div");
+  box.id = "customNotice";
+  box.innerHTML = `
+    <div class="notice-overlay">
+      <div class="notice-box">
+        <div class="notice-icon">${icon}</div>
+        <p>${message}</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(box);
+
+  playSound(type); // 🔊 Suara diputar di sini
+
+  // Fade out after 3 seconds
+  setTimeout(() => {
+    const overlay = document.getElementById("customNotice");
+    if (overlay) {
+      overlay.style.opacity = "0";
+      setTimeout(() => overlay.remove(), 500);
+    }
+  }, 3000);
+}
+
+
+function playSound(type = "info") {
+  const audio = new Audio(
+    type === "success" ? "assets/sounds/success.mp3" : "assets/sounds/info.mp3"
+  );
+  audio.volume = 0.5;
+  audio.play().catch((e) => console.warn("Sound play blocked:", e));
+}
+
 
 // Auto-render
 if (document.getElementById("inventoryList")) renderInventory();
