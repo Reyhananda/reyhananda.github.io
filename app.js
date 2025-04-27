@@ -74,16 +74,55 @@ function useSelectedLOTOS() {
 
   showPrompt("Describe the activity for selected LOTO(s):", (description) => {
     if (!description) return;
+
+    const usedIds = [];
+
     selected.forEach(index => {
       if (inventory[index].qty > 0) {
         inventory[index].qty = 0;
         inventory[index].description = description;
         logActivity("Use", inventory[index].id, 1, description);
+        usedIds.push(inventory[index].id);
       }
     });
+
     renderInventory();
+
+    if (usedIds.length === 1) {
+      showNotice(`Now You Can Use ${usedIds[0]}, Don't forget to return it back after use`, "info");
+    } else {
+      const tableHTML = `
+        <div class="loto-table">
+          ${usedIds.map(id => `<div class="loto-item">🔹 ${id}</div>`).join('')}
+        </div>
+      `;
+      showNotice(`You can now use ${usedIds.length} LOTO(s):<br>${tableHTML}<br>Don't forget to return them!`, "info", true);
+    }
   });
 }
+
+let recentlyDeletedLOTOS = []; // Global untuk simpan sementara
+
+function deleteSelectedLOTOS() {
+  const selected = [...document.querySelectorAll(".multi-check:checked")].map(cb => parseInt(cb.dataset.index));
+  if (selected.length === 0) return alert("Please select at least one LOTO to delete.");
+
+  if (!confirm(`Are you sure you want to delete ${selected.length} LOTO(s)?`)) return;
+
+  // Backup data LOTO yang mau dihapus
+  recentlyDeletedLOTOS = selected.map(index => inventory[index]);
+
+  // Hapus dari array inventory
+  selected.sort((a, b) => b - a).forEach(index => {
+    inventory.splice(index, 1);
+  });
+
+  renderInventory();
+  
+  showUndoNotice(`${selected.length} LOTO(s) have been deleted!`, "success");
+}
+
+
 
 function addNewLOTO() {
   showPrompt("Enter name for new LOTO:", (name) => {
@@ -123,12 +162,13 @@ function renderHistory() {
   history.slice(0, 30).forEach(entry => {
     const li = document.createElement("li");
     const desc = entry.description ? ` - 📋 ${entry.description}` : "";
-    li.innerHTML = `<strong style="color: #2c3e50">${entry.date}</strong> - ${entry.user} <em style="color: #2c3e50">${entry.type}</em>: ${entry.id}${desc}`;
+    li.innerHTML = `<strong>${entry.date}</strong> - ${entry.user} <em>${entry.type}</em>: ${entry.id}${desc}`;
     list.appendChild(li);
   });
 
-  addNavigation();
+  addHistoryNavigation();
 }
+
 
 function addNavigation() {
   const existing = document.getElementById("navBar");
@@ -137,36 +177,73 @@ function addNavigation() {
   const nav = document.createElement("div");
   nav.id = "navBar";
   nav.innerHTML = `
-  <div class="nav-bar" style="flex-direction: column; align-items: stretch;">
-    <div class="floating-action">
-      <button id="multiUseBtn" disabled>📦 Use Selected LOTO</button>
-    </div>
-    <div style="display: flex; justify-content: center; gap: 10px; padding: 6px 0;">
-      <a href="history.html" class="history-btn">📜 History</a>
-      <a href="index.html" class="logout-btn">🚪 Logout</a>
-    </div>
+<div class="nav-bar" style="flex-direction: column; align-items: stretch;">
+  <div class="floating-action" style="display: flex; justify-content: center; gap: 10px; padding: 6px;">
+    <button id="multiUseBtn" disabled style="flex:1;">
+      📦 Use Selected LOTO <span id="counterBadge" style="display:none;">(0)</span>
+    </button>
+    <button id="multiDeleteBtn" disabled style="background-color: #e74c3c; flex:1;">
+      🗑️ Delete Selected LOTO
+    </button>
   </div>
+  <div style="display: flex; justify-content: center; gap: 10px; padding: 6px 0;">
+    <a href="history.html" id="historyLink" class="history-btn">📜 History</a>   
+    <a href="index.html" id="logoutLink" class="logout-btn">🚪 Logout</a>
+  </div>
+</div>
+
 `;
 
   document.body.appendChild(nav);
 
   document.getElementById("multiUseBtn").addEventListener("click", useSelectedLOTOS);
+  document.getElementById("multiDeleteBtn").addEventListener("click", deleteSelectedLOTOS);
+  
+  document.getElementById("historyLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    pageFadeOut("history.html");
+  });
+  document.getElementById("logoutLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    pageFadeOut("index.html");
+  });
+  
 }
 
 function setupMultiSelectListener() {
   const checkboxes = document.querySelectorAll(".multi-check");
-  const btn = document.getElementById("multiUseBtn");
-  if (!btn) return;
+  const btnUse = document.getElementById("multiUseBtn");
+  const btnDelete = document.getElementById("multiDeleteBtn");
+  const badge = document.getElementById("counterBadge");
+  if (!btnUse || !badge || !btnDelete) return;
+
+  function updateBadge() {
+    const selected = [...checkboxes].filter(cb => cb.checked).length;
+    btnUse.disabled = selected === 0;
+    btnDelete.disabled = selected === 0;
+    btnUse.style.opacity = selected > 0 ? "1" : "0.6";
+    btnDelete.style.opacity = selected > 0 ? "1" : "0.6";
+    btnUse.style.cursor = selected > 0 ? "pointer" : "not-allowed";
+    btnDelete.style.cursor = selected > 0 ? "pointer" : "not-allowed";
+
+    badge.textContent = `(${selected})`;
+    badge.style.display = selected > 0 ? "inline-block" : "none";
+
+    if (selected > 1) {
+      btnUse.classList.add("shake");
+      setTimeout(() => btnUse.classList.remove("shake"), 500);
+      btnDelete.classList.add("shake");
+      setTimeout(() => btnDelete.classList.remove("shake"), 500);
+    }
+  }
 
   checkboxes.forEach(cb => {
-    cb.addEventListener("change", () => {
-      const anyChecked = [...checkboxes].some(c => c.checked);
-      btn.disabled = !anyChecked;
-      btn.style.opacity = anyChecked ? "1" : "0.6";
-      btn.style.cursor = anyChecked ? "pointer" : "not-allowed";
-    });
+    cb.addEventListener("change", updateBadge);
   });
+
+  updateBadge();
 }
+
 
 function showPrompt(message, callback) {
   const existing = document.getElementById("customPrompt");
@@ -200,7 +277,7 @@ function showPrompt(message, callback) {
   });
 }
 
-function showNotice(message, type = "info") {
+function showNotice(message, type = "info", allowHTML = false) {
   const existing = document.getElementById("customNotice");
   if (existing) existing.remove();
 
@@ -210,15 +287,15 @@ function showNotice(message, type = "info") {
   box.id = "customNotice";
   box.innerHTML = `
     <div class="notice-overlay">
-      <div class="notice-box">
+      <div class="notice-box slide-up">
         <div class="notice-icon">${icon}</div>
-        <p>${message}</p>
+        <p ${allowHTML ? 'style="text-align:left;"' : ""}>${message}</p>
       </div>
     </div>
   `;
   document.body.appendChild(box);
 
-  playSound(type); // 🔊 Suara diputar di sini
+  playSound(type);
 
   // Fade out after 3 seconds
   setTimeout(() => {
@@ -230,6 +307,91 @@ function showNotice(message, type = "info") {
   }, 3000);
 }
 
+function showUndoNotice(message, type = "info") {
+  const existing = document.getElementById("customNotice");
+  if (existing) existing.remove();
+
+  const icon = type === "success" ? "🗑️" : "🔔";
+
+  const box = document.createElement("div");
+  box.id = "customNotice";
+  box.innerHTML = `
+    <div class="notice-overlay">
+      <div class="notice-box slide-up">
+        <div class="notice-icon">${icon}</div>
+        <p>${message}</p>
+        <button id="undoButton" style="margin-top:10px; padding:6px 14px; background-color:#27ae60; border:none; color:white; border-radius:8px; font-weight:bold;">UNDO</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(box);
+
+  playSound(type);
+
+  document.getElementById("undoButton").addEventListener("click", () => {
+    undoDelete();
+  });
+
+  // Auto remove after 5 seconds kalau tidak klik UNDO
+  setTimeout(() => {
+    const overlay = document.getElementById("customNotice");
+    if (overlay) {
+      overlay.style.opacity = "0";
+      setTimeout(() => overlay.remove(), 500);
+      recentlyDeletedLOTOS = []; // Clear backup kalau tidak undo
+    }
+  }, 5000);
+}
+
+function undoDelete() {
+  if (recentlyDeletedLOTOS.length === 0) return;
+
+  inventory = recentlyDeletedLOTOS.concat(inventory);
+  recentlyDeletedLOTOS = [];
+
+  renderInventory();
+
+  // Tambahkan efek fade-in untuk seluruh card baru
+  const cards = document.querySelectorAll(".item-card");
+  cards.forEach(card => {
+    card.classList.add("fade-in");
+    setTimeout(() => card.classList.remove("fade-in"), 800); // Hapus class setelah animasi selesai
+  });
+
+  showNotice("Deleted LOTO(s) have been restored!", "success");
+}
+
+function pageFadeOut(target) {
+  document.body.style.transition = "opacity 0.5s";
+  document.body.style.opacity = "0";
+  setTimeout(() => {
+    window.location.href = target;
+  }, 500);
+}
+
+function addHistoryNavigation() {
+  const existing = document.getElementById("navBar");
+  if (existing) existing.remove();
+
+  const nav = document.createElement("div");
+  nav.id = "navBar";
+  nav.innerHTML = `
+    <div class="nav-bar">
+      <a href="#" id="homeLink" class="home-button">🏠 Home</a>
+      <a href="#" id="logoutLink" class="logout-btn">🚪 Logout</a>
+    </div>
+  `;
+  document.body.appendChild(nav);
+
+  document.getElementById("homeLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    pageFadeOut("inventory.html");
+  });
+  document.getElementById("logoutLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    pageFadeOut("index.html");
+  });
+}
 
 function playSound(type = "info") {
   const audio = new Audio(
