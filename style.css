@@ -453,3 +453,23 @@ ul#historyList {
 .fade-in {
   animation: fadeInSmooth 0.5s ease-out;
 }
+
+#welcomeHeader {
+  position: sticky;
+  top: 0;
+  background-color: #2c3e50;
+  color: white;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  animation: slideDown 0.5s ease;
+}
+
+/* Animasi saat masuk */
+@keyframes slideDown {
+  0% { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}

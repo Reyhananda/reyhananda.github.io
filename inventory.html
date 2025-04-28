@@ -7,16 +7,29 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h2>Welcome back to LOTOGuard, <span id="userName"></span> ❤️</h2>
+  <header id="welcomeHeader">
+      
+    <h2>Welcome back to LOTOGuard, <span id="usernameSpan"></span>! </h2>
   </header>
 
   <section id="inventoryList" class="grid"></section>
 
   <script src="app.js"></script>
   <script>
-    document.getElementById("userName").innerText = localStorage.getItem("lotoUser") || "Guest";
+  function updateUsernameDisplay() {
+    const usernameSpan = document.getElementById("usernameSpan");
+    if (usernameSpan) {
+      const user = localStorage.getItem("lotoUser") || "Guest";
+      usernameSpan.textContent = user;
+    }
+  }
+
+  if (document.getElementById("inventoryList")) {
     renderInventory();
+    updateUsernameDisplay();
+    playSound("login");
+  }
+
   </script>
 </body>
 </html>
